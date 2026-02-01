@@ -1,4 +1,4 @@
-import { DashboardCharts } from "./DashboardCharts";
+import DashboardCharts from "./DashboardCharts";
 export default function Visitante({ amostras, entrar }) {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
