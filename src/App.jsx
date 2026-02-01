@@ -1,90 +1,33 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Modal from "./components/Modal";
-import Login from "./components/Login";
-import Visitante from "./components/Visitante";
 import DashboardCharts from "./components/DashboardCharts";
 import { enviarParaPlanilha, buscarDaPlanilha } from "./services/planilha";
+import { criarModeloAmostra } from "./models/AmostraModel";
 
 function App() {
   const [amostras, setAmostras] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState(null);
-  const [usuario, setUsuario] = useState(null);
-  const [mostrarLogin, setMostrarLogin] = useState(false);
+  const usuario = localStorage.getItem("usuarioLogado") || "Igor";
 
-  // 🔹 Carrega usuário logado
   useEffect(() => {
-    const user = localStorage.getItem("usuarioLogado");
-    if (user) setUsuario(user);
-  }, []);
-
-  // 🔹 Busca dados da planilha sempre ao abrir
-  useEffect(() => {
-    async function carregar() {
-      const dados = await buscarDaPlanilha();
-      setAmostras(dados);
-    }
     carregar();
   }, []);
 
-  async function salvarAmostra(dados) {
-    await enviarParaPlanilha(dados);
-    const atualizadas = await buscarDaPlanilha();
-    setAmostras(atualizadas);
+  async function carregar() {
+    const dados = await buscarDaPlanilha();
+    setAmostras(dados);
   }
 
-  function podeEditar(amostra) {
-    return usuario === "Igor" || usuario === amostra.criadoPor;
+  async function salvar(dados) {
+    const modelo = criarModeloAmostra(dados, usuario);
+    await enviarParaPlanilha(modelo);
+    await carregar();
   }
 
-  // 🟡 TELA VISITANTE (não logado)
-  if (!usuario && !mostrarLogin) {
-    return (
-      <div>
-        <Visitante amostras={amostras} />
-        <div className="fixed top-4 right-4">
-          <button
-            onClick={() => setMostrarLogin(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Entrar
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // 🔵 TELA LOGIN
-  if (!usuario && mostrarLogin) {
-    return (
-      <Login
-        onLogin={(user) => {
-          localStorage.setItem("usuarioLogado", user);
-          setUsuario(user);
-        }}
-      />
-    );
-  }
-
-  // 🟢 SISTEMA LOGADO
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="flex justify-between mb-6">
-        <p>
-          Usuário: <strong>{usuario}</strong>
-        </p>
-        <button
-          onClick={() => {
-            localStorage.removeItem("usuarioLogado");
-            setUsuario(null);
-          }}
-          className="bg-red-600 px-3 py-1 rounded"
-        >
-          Sair
-        </button>
-      </div>
-
-      <h1 className="text-3xl font-bold mb-6">Controle de Amostras</h1>
+    <div className="p-8 bg-gray-900 min-h-screen text-white">
+      <h1 className="text-3xl mb-4">Controle de Amostras</h1>
 
       <DashboardCharts amostras={amostras} />
 
@@ -93,52 +36,38 @@ function App() {
           setEditando(null);
           setModalOpen(true);
         }}
-        className="bg-blue-600 px-4 py-2 rounded my-6"
+        className="bg-blue-600 px-4 py-2 rounded my-4"
       >
         Nova Amostra
       </button>
 
-      <div className="grid gap-4">
-        {amostras.map((a) => (
-          <div
-            key={a.id}
-            className="bg-gray-800 p-4 rounded flex justify-between items-center"
+      {amostras.map(a => (
+        <div key={a.id} className="bg-gray-800 p-4 rounded my-2">
+          {a.numeroSerie} - {a.modelo}
+          <button
+            onClick={() => {
+              setEditando(a);
+              setModalOpen(true);
+            }}
+            className="ml-4 bg-yellow-600 px-2 py-1 rounded"
           >
-            <div>
-              <p className="font-semibold">{a.numeroSerie}</p>
-              <p className="text-sm text-gray-400">Modelo: {a.modelo}</p>
-              <p className="text-sm text-gray-400">
-                Criado por: {a.criadoPor}
-              </p>
-            </div>
-
-            {podeEditar(a) && (
-              <button
-                onClick={() => {
-                  setEditando(a);
-                  setModalOpen(true);
-                }}
-                className="bg-yellow-600 px-3 py-1 rounded"
-              >
-                Editar
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
+            Editar
+          </button>
+        </div>
+      ))}
 
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSave={salvarAmostra}
+        onSave={salvar}
         amostra={editando}
-        usuario={usuario}
       />
     </div>
   );
 }
 
 export default App;
+
 
 
 
