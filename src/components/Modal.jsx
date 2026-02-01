@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 
-function Modal({ isOpen, onClose, onSave, amostra }) {
+export default function Modal({ isOpen, onClose, onSave, amostra }) {
   const [numeroSerie, setNumeroSerie] = useState("");
   const [modelo, setModelo] = useState("");
   const [status, setStatus] = useState("em_teste");
-  const [observacao, setObservacao] = useState("pendente");
+  const [observacao, setObservacao] = useState("Pendente");
   const [destinacao, setDestinacao] = useState("");
 
   useEffect(() => {
@@ -35,62 +35,34 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
-      <div className="bg-white p-6 rounded w-[500px] text-black">
-        <h2 className="text-xl mb-4">Amostra</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded text-black w-[500px]">
+        <form onSubmit={handleSubmit} className="space-y-3">
 
-        <input
-          className="border p-2 w-full mb-2"
-          placeholder="Número de Série"
-          value={numeroSerie}
-          onChange={(e) => setNumeroSerie(e.target.value)}
-        />
+          <input value={numeroSerie} onChange={e => setNumeroSerie(e.target.value)} placeholder="Numero de Série" className="w-full border p-2"/>
 
-        <input
-          className="border p-2 w-full mb-2"
-          placeholder="Modelo"
-          value={modelo}
-          onChange={(e) => setModelo(e.target.value)}
-        />
+          <input value={modelo} onChange={e => setModelo(e.target.value)} placeholder="Modelo" className="w-full border p-2"/>
 
-        <select
-          className="border p-2 w-full mb-2"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
-          <option value="em_teste">Em teste</option>
-          <option value="aguardando">Aguardando</option>
-          <option value="finalizado">Finalizado</option>
-        </select>
+          <select value={status} onChange={e => setStatus(e.target.value)} className="w-full border p-2">
+            <option value="em_teste">Em teste</option>
+            <option value="aguardando">Aguardando</option>
+            <option value="finalizado">Finalizado</option>
+          </select>
 
-        <select
-          className="border p-2 w-full mb-2"
-          value={observacao}
-          onChange={(e) => setObservacao(e.target.value)}
-        >
-          <option value="pendente">Pendente</option>
-          <option value="OK">OK</option>
-          <option value="NOK">NOK</option>
-        </select>
+          <select value={observacao} onChange={e => setObservacao(e.target.value)} className="w-full border p-2">
+            <option>Pendente</option>
+            <option>OK</option>
+            <option>NOK</option>
+          </select>
 
-        <input
-          className="border p-2 w-full mb-4"
-          placeholder="Destinação"
-          value={destinacao}
-          onChange={(e) => setDestinacao(e.target.value)}
-        />
+          <input value={destinacao} onChange={e => setDestinacao(e.target.value)} placeholder="Destinação" className="w-full border p-2"/>
 
-        <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded">
-          Salvar
-        </button>
+          <button className="bg-blue-600 text-white px-4 py-2">Salvar</button>
+        </form>
       </div>
     </div>
   );
 }
-
-export default Modal;
-
-
 
 
 
