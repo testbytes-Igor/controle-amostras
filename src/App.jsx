@@ -6,47 +6,38 @@ import Login from "./components/Login";
 import { enviarParaPlanilha, buscarDaPlanilha } from "./services/planilha";
 import { criarModeloAmostra } from "./models/AmostraModel";
 
-function App() {
+export default function App() {
   const [amostras, setAmostras] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState(null);
 
   const [usuario, setUsuario] = useState(null);
   const [mostrarLogin, setMostrarLogin] = useState(false);
-  const [carregado, setCarregado] = useState(false);
 
-  // Carrega usuário
   useEffect(() => {
     const user = localStorage.getItem("usuarioLogado");
     if (user) setUsuario(user);
-  }, []);
-
-  // Carrega dados da planilha
-  useEffect(() => {
-    async function carregar() {
-      const dados = await buscarDaPlanilha();
-      setAmostras(dados);
-      setCarregado(true);
-    }
     carregar();
   }, []);
+
+  async function carregar() {
+    const dados = await buscarDaPlanilha();
+    setAmostras(dados);
+  }
 
   async function salvar(dados) {
     const modelo = criarModeloAmostra(dados, usuario);
     await enviarParaPlanilha(modelo);
-
-    const atualizados = await buscarDaPlanilha();
-    setAmostras(atualizados);
-  }
-
-  if (!carregado) {
-    return <div className="text-white p-8">Carregando dados...</div>;
+    await carregar();
   }
 
   // VISITANTE
   if (!usuario && !mostrarLogin) {
     return (
-      <Visitante amostras={amostras} onEntrar={() => setMostrarLogin(true)} />
+      <Visitante
+        amostras={amostras}
+        onEntrar={() => setMostrarLogin(true)}
+      />
     );
   }
 
@@ -62,6 +53,7 @@ function App() {
     );
   }
 
+  // TELA PRINCIPAL
   return (
     <div className="p-8 bg-gray-900 min-h-screen text-white">
       <div className="flex justify-between mb-4">
@@ -115,24 +107,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
