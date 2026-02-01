@@ -1,5 +1,5 @@
 const URL =
-  "https://script.google.com/macros/s/AKfycbx4dmatOexlBVcxtlSbgi4m7hJBTmXN05Ev7VnE9dieGa6mO3kWpWZqCnqCWnE7cTLK/exec"; // aquele do Apps Script /exec
+  "https://script.google.com/macros/s/AKfycbxYQpQYwhpYUzNj0Q2ZNIR4vWHgB6SZDmkydotUG6kwSzFM-Kxa-HD3k-Uz16PLzW3W/exec"; // aquele do Apps Script /exec
 const TOKEN = "LAB_AMOSTRAS_2026";
 
 export async function enviarParaPlanilha(dados) {
