@@ -1,9 +1,10 @@
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxCrE-owqZLEPQwPOGQPUCkkn88OjOjVY3RZepjM4WHTrr6B7Jtkxr0p8e8fzogsq6z/exec";
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzuFlJqbdWjE5yvZYtJuDYIPcGRotNukNBsBT4mZR49_-nQgB7gRaWii6rmW1mfBOpl/exec";
 const TOKEN = "LAB_AMOSTRAS_2026";
 
 export async function enviarParaPlanilha(amostra) {
   await fetch(URL_SCRIPT, {
     method: "POST",
+    mode: "no-cors",
     headers: {
       "Content-Type": "application/json",
     },
@@ -18,6 +19,7 @@ export async function buscarDaPlanilha() {
   const response = await fetch(URL_SCRIPT);
   return await response.json();
 }
+
 
 
 
