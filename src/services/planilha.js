@@ -1,26 +1,58 @@
 const URL = "https://script.google.com/macros/s/AKfycbxrpaFcnSNABbl7Bi_VI7WP7hOoi7N_Pb7A8iGGRXEVzyc-H-UxVg6pznsUS1DxHosj/exec";
-const TOKEN = "LAB_AMOSTRAS_2026";
 
-// 🔥 ENVIA (novo ou edição)
+// nunca deixe token hardcoded
+const TOKEN = import.meta.env.VITE_TOKEN_PLANILHA;
+
+async function safeFetch(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const resp = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Erro HTTP: ${resp.status}`);
+    }
+
+    return await resp.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// 🔥 ENVIA
 export async function enviarParaPlanilha(dados) {
-  await fetch(URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      ...dados,
-      token: TOKEN,
-      acao: "salvar", // 🔥 avisa o Apps Script
-    }),
-  });
+  try {
+    const resposta = await safeFetch(URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...dados,
+        token: TOKEN,
+        acao: "salvar",
+      }),
+    });
+
+    return resposta;
+  } catch (err) {
+    console.error("Erro ao enviar:", err);
+    throw err;
+  }
 }
 
-// 🔥 BUSCA sempre dados frescos
+// 🔥 BUSCA
 export async function buscarDaPlanilha() {
-  const resp = await fetch(`${URL}?t=${Date.now()}`);
-  return await resp.json();
+  try {
+    return await safeFetch(`${URL}?t=${Date.now()}`);
+  } catch (err) {
+    console.error("Erro ao buscar:", err);
+    return [];
+  }
 }
+
 
 
 

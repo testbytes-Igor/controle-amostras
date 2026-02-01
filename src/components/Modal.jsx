@@ -1,21 +1,31 @@
 import { useState, useEffect } from "react";
 
+const STATUS = ["Em teste", "Aguardando", "Finalizado"];
+const OBS = ["Pendente", "OK", "NOK"];
+
 export default function Modal({ isOpen, onClose, onSave, amostra }) {
   const [numeroSerie, setNumeroSerie] = useState("");
   const [modelo, setModelo] = useState("");
-  const [status, setStatus] = useState("em_teste");
-  const [observacao, setObservacao] = useState("Pendente");
+  const [status, setStatus] = useState(STATUS[0]);
+  const [observacao, setObservacao] = useState(OBS[0]);
   const [destinacao, setDestinacao] = useState("");
 
   useEffect(() => {
     if (amostra) {
-      setNumeroSerie(amostra.numeroSerie);
-      setModelo(amostra.modelo);
-      setStatus(amostra.status);
-      setObservacao(amostra.observacao);
+      setNumeroSerie(amostra.numeroSerie || "");
+      setModelo(amostra.modelo || "");
+      setStatus(amostra.status || STATUS[0]);
+      setObservacao(amostra.observacao || OBS[0]);
       setDestinacao(amostra.destinacao || "");
+    } else {
+      // LIMPA quando é nova amostra
+      setNumeroSerie("");
+      setModelo("");
+      setStatus(STATUS[0]);
+      setObservacao(OBS[0]);
+      setDestinacao("");
     }
-  }, [amostra]);
+  }, [amostra, isOpen]);
 
   if (!isOpen) return null;
 
@@ -36,28 +46,53 @@ export default function Modal({ isOpen, onClose, onSave, amostra }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded text-black w-[500px]">
+      <div className="bg-white p-6 rounded-xl text-black w-[500px] shadow-xl">
         <form onSubmit={handleSubmit} className="space-y-3">
 
-          <input value={numeroSerie} onChange={e => setNumeroSerie(e.target.value)} placeholder="Numero de Série" className="w-full border p-2"/>
+          <input
+            value={numeroSerie}
+            onChange={e => setNumeroSerie(e.target.value)}
+            placeholder="Número de Série"
+            className="w-full border p-2 rounded"
+          />
 
-          <input value={modelo} onChange={e => setModelo(e.target.value)} placeholder="Modelo" className="w-full border p-2"/>
+          <input
+            value={modelo}
+            onChange={e => setModelo(e.target.value)}
+            placeholder="Modelo"
+            className="w-full border p-2 rounded"
+          />
 
-          <select value={status} onChange={e => setStatus(e.target.value)} className="w-full border p-2">
-            <option value="em_teste">Em teste</option>
-            <option value="aguardando">Aguardando</option>
-            <option value="finalizado">Finalizado</option>
+          <select
+            value={status}
+            onChange={e => setStatus(e.target.value)}
+            className="w-full border p-2 rounded"
+          >
+            {STATUS.map(s => (
+              <option key={s}>{s}</option>
+            ))}
           </select>
 
-          <select value={observacao} onChange={e => setObservacao(e.target.value)} className="w-full border p-2">
-            <option>Pendente</option>
-            <option>OK</option>
-            <option>NOK</option>
+          <select
+            value={observacao}
+            onChange={e => setObservacao(e.target.value)}
+            className="w-full border p-2 rounded"
+          >
+            {OBS.map(o => (
+              <option key={o}>{o}</option>
+            ))}
           </select>
 
-          <input value={destinacao} onChange={e => setDestinacao(e.target.value)} placeholder="Destinação" className="w-full border p-2"/>
+          <input
+            value={destinacao}
+            onChange={e => setDestinacao(e.target.value)}
+            placeholder="Destinação"
+            className="w-full border p-2 rounded"
+          />
 
-          <button className="bg-blue-600 text-white px-4 py-2">Salvar</button>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded w-full">
+            Salvar
+          </button>
         </form>
       </div>
     </div>

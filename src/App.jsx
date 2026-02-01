@@ -8,6 +8,8 @@ import { criarModeloAmostra } from "./models/AmostraModel";
 
 export default function App() {
   const [amostras, setAmostras] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState(null);
 
@@ -21,14 +23,42 @@ export default function App() {
   }, []);
 
   async function carregar() {
-    const dados = await buscarDaPlanilha();
-    setAmostras(dados);
+    try {
+      setLoading(true);
+      const dados = await buscarDaPlanilha();
+      setAmostras(dados);
+    } catch (e) {
+      console.error("Erro ao carregar amostras", e);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function salvar(dados) {
     const modelo = criarModeloAmostra(dados, usuario);
-    await enviarParaPlanilha(modelo);
-    await carregar();
+
+    try {
+      await enviarParaPlanilha(modelo);
+
+      // 🔥 atualiza local sem recarregar tudo
+      setAmostras((prev) => {
+        const existe = prev.find(a => a.id === modelo.id);
+        if (existe) {
+          return prev.map(a => a.id === modelo.id ? modelo : a);
+        }
+        return [...prev, modelo];
+      });
+    } catch (e) {
+      console.error("Erro ao salvar", e);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        Carregando dados...
+      </div>
+    );
   }
 
   // VISITANTE
@@ -53,7 +83,7 @@ export default function App() {
     );
   }
 
-  // TELA PRINCIPAL
+  // SISTEMA
   return (
     <div className="p-8 bg-gray-900 min-h-screen text-white">
       <div className="flex justify-between mb-4">
