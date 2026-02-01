@@ -5,10 +5,13 @@ import { enviarParaPlanilha, buscarDaPlanilha } from "./services/planilha";
 import { criarModeloAmostra } from "./models/AmostraModel";
 
 function App() {
-  const [amostras, setAmostras] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editando, setEditando] = useState(null);
-  const usuario = localStorage.getItem("usuarioLogado") || "Igor";
+  const [usuario, setUsuario] = useState(null);
+const [mostrarLogin, setMostrarLogin] = useState(false);
+
+useEffect(() => {
+  const user = localStorage.getItem("usuarioLogado");
+  if (user) setUsuario(user);
+}, []);
 
   useEffect(() => {
     carregar();
@@ -24,7 +27,36 @@ function App() {
     await enviarParaPlanilha(modelo);
     await carregar();
   }
+// VISITANTE
+if (!usuario && !mostrarLogin) {
+  return (
+    <Visitante amostras={amostras} onEntrar={() => setMostrarLogin(true)} />
+  );
+}
 
+// LOGIN
+if (!usuario && mostrarLogin) {
+  return (
+    <Login
+      onLogin={(user) => {
+        localStorage.setItem("usuarioLogado", user);
+        setUsuario(user);
+      }}
+    />
+  );
+}
+<div className="flex justify-between mb-4">
+  <p>Usuário: <strong>{usuario}</strong></p>
+  <button
+    onClick={() => {
+      localStorage.removeItem("usuarioLogado");
+      setUsuario(null);
+    }}
+    className="bg-red-600 px-3 py-1 rounded"
+  >
+    Sair
+  </button>
+</div>
   return (
     <div className="p-8 bg-gray-900 min-h-screen text-white">
       <h1 className="text-3xl mb-4">Controle de Amostras</h1>

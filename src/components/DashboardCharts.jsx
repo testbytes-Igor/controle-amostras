@@ -5,14 +5,13 @@ function DashboardCharts({ amostras }) {
   const nok = amostras.filter(a => a.status === "Finalizado" && a.observacao === "NOK").length;
 
   return (
-    <div className="grid grid-cols-4 gap-4 my-6">
-      <div className="bg-blue-700 p-4 rounded">Em teste: {emTeste}</div>
-      <div className="bg-yellow-600 p-4 rounded">Aguardando: {aguardando}</div>
-      <div className="bg-green-600 p-4 rounded">OK: {ok}</div>
-      <div className="bg-red-600 p-4 rounded">NOK: {nok}</div>
+    <div className="grid grid-cols-4 gap-6 mb-6">
+      <div className="bg-blue-600 p-6 rounded-xl shadow">Em teste: {emTeste}</div>
+      <div className="bg-yellow-600 p-6 rounded-xl shadow">Aguardando: {aguardando}</div>
+      <div className="bg-green-600 p-6 rounded-xl shadow">OK: {ok}</div>
+      <div className="bg-red-600 p-6 rounded-xl shadow">NOK: {nok}</div>
     </div>
   );
 }
 
-export default DashboardCharts;
 
