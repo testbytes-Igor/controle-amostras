@@ -8,7 +8,6 @@ function Modal({ isOpen, onClose, onSave, amostraEditando, usuario }) {
   const [observacao, setObservacao] = useState("pendente");
   const [destinacao, setDestinacao] = useState("");
 
-  // 🔵 Preenche quando estiver editando
   useEffect(() => {
     if (amostraEditando) {
       setNumeroSerie(amostraEditando.numeroSerie);
@@ -30,19 +29,18 @@ function Modal({ isOpen, onClose, onSave, amostraEditando, usuario }) {
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (!numeroSerie || !modelo || !status) {
-      alert("Preencha todos os campos obrigatórios!");
+    if (!numeroSerie || !modelo) {
+      alert("Preencha os campos obrigatórios!");
       return;
     }
 
     if (status === "finalizado" && !destinacao) {
-      alert("Informe a destinação quando o status for Finalizado.");
+      alert("Informe a destinação para finalizado.");
       return;
     }
 
     let amostraFinal;
 
-    // 🟡 Se estiver editando
     if (amostraEditando) {
       amostraFinal = {
         ...amostraEditando,
@@ -53,9 +51,7 @@ function Modal({ isOpen, onClose, onSave, amostraEditando, usuario }) {
         destinacao,
         editadoPor: usuario,
       };
-    }
-    // 🟢 Nova amostra
-    else {
+    } else {
       amostraFinal = criarModeloAmostra({
         numeroSerie,
         modelo,
@@ -72,105 +68,65 @@ function Modal({ isOpen, onClose, onSave, amostraEditando, usuario }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-      <div className="bg-white rounded-lg w-[520px] p-6 shadow-lg text-gray-800">
+      <div className="bg-white text-gray-800 p-6 rounded w-[500px]">
         <h2 className="text-xl font-bold mb-4">
           {amostraEditando ? "Editar Amostra" : "Nova Amostra"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Número de Série */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Número de Série *
-            </label>
-            <input
-              type="text"
-              value={numeroSerie}
-              onChange={(e) => setNumeroSerie(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              placeholder="Ex: 23BRX88921"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Número de Série"
+            value={numeroSerie}
+            onChange={(e) => setNumeroSerie(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          />
 
-          {/* Modelo */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Modelo *
-            </label>
-            <input
-              type="text"
-              value={modelo}
-              onChange={(e) => setModelo(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              placeholder="Ex: MD-RT650EVK"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Modelo"
+            value={modelo}
+            onChange={(e) => setModelo(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          />
 
-          {/* Status */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Status *
-            </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            >
-              <option value="em_teste">Em teste</option>
-              <option value="aguardando">Aguardando</option>
-              <option value="finalizado">Finalizado</option>
-            </select>
-          </div>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          >
+            <option value="em_teste">Em teste</option>
+            <option value="aguardando">Aguardando</option>
+            <option value="finalizado">Finalizado</option>
+          </select>
 
-          {/* Observação */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Observação
-            </label>
-            <select
-              value={observacao}
-              onChange={(e) => setObservacao(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            >
-              <option value="pendente">Pendente</option>
-              <option value="OK">OK</option>
-              <option value="NOK">NOK</option>
-            </select>
-          </div>
+          <select
+            value={observacao}
+            onChange={(e) => setObservacao(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          >
+            <option value="pendente">Pendente</option>
+            <option value="OK">OK</option>
+            <option value="NOK">NOK</option>
+          </select>
 
-          {/* Destinação */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Destinação {status === "finalizado" && "*"}
-            </label>
-            <input
-              type="text"
-              value={destinacao}
-              onChange={(e) => setDestinacao(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              placeholder="Ex: Descarte, Retorno fornecedor, Arquivo..."
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Destinação"
+            value={destinacao}
+            onChange={(e) => setDestinacao(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          />
 
-          {/* Botões */}
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="bg-gray-400 text-white px-4 py-2 rounded"
-            >
+          <div className="flex justify-end gap-2">
+            <button onClick={onClose} type="button" className="bg-gray-400 px-4 py-2 rounded text-white">
               Cancelar
             </button>
-
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
+            <button type="submit" className="bg-blue-600 px-4 py-2 rounded text-white">
               Salvar
             </button>
           </div>
-
         </form>
       </div>
     </div>
@@ -178,6 +134,7 @@ function Modal({ isOpen, onClose, onSave, amostraEditando, usuario }) {
 }
 
 export default Modal;
+
 
 
 
