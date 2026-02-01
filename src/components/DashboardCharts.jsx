@@ -1,11 +1,13 @@
 export default function DashboardCharts({ amostras }) {
-  const emTeste = amostras.filter(a => a.status === "Em teste").length;
-  const aguardando = amostras.filter(a => a.status === "Aguardando").length;
+  const emTeste = amostras.filter(a => a.status === "em_teste").length;
+  const aguardando = amostras.filter(a => a.status === "aguardando").length;
+
   const ok = amostras.filter(
-    a => a.status === "Finalizado" && a.observacao === "OK"
+    a => a.status === "finalizado" && a.observacao === "OK"
   ).length;
+
   const nok = amostras.filter(
-    a => a.status === "Finalizado" && a.observacao === "NOK"
+    a => a.status === "finalizado" && a.observacao === "NOK"
   ).length;
 
   return (
