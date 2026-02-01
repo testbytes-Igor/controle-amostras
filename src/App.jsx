@@ -3,145 +3,96 @@ import Modal from "./components/Modal";
 import Login from "./components/Login";
 import Visitante from "./components/Visitante";
 import DashboardCharts from "./components/DashboardCharts";
-import { enviarParaPlanilha, buscarDaPlanilha } from "./services/planilha";
+import { salvarAmostra, buscarAmostras } from "./services/planilha";
 
 function App() {
   const [amostras, setAmostras] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [usuario, setUsuario] = useState(null);
-  const [modoVisitante, setModoVisitante] = useState(true);
   const [amostraEditando, setAmostraEditando] = useState(null);
+  const [usuario, setUsuario] = useState(null);
 
-  // 🔵 Carrega dados da planilha ao iniciar
+  // 🔵 Carrega SEMPRE da planilha ao iniciar
+  async function carregarAmostras() {
+    const dados = await buscarAmostras();
+    setAmostras(dados);
+  }
+
   useEffect(() => {
-    async function carregar() {
-      const dados = await buscarDaPlanilha();
-      setAmostras(dados);
-    }
-    carregar();
+    carregarAmostras();
   }, []);
 
-  // 🔵 Adicionar nova amostra
-  async function adicionarAmostra(novaAmostra) {
-    await enviarParaPlanilha(novaAmostra);
-    setAmostras((prev) => [...prev, novaAmostra]);
-    setModalOpen(false);
+  // 🟢 Salvar nova ou edição
+  async function handleSave(amostra) {
+    await salvarAmostra(amostra);
+    await carregarAmostras(); // recarrega da planilha
   }
 
-  // 🔵 Editar amostra (apenas visual no app, histórico fica na planilha)
-  function editarAmostra(amostraAtualizada) {
-    setAmostras((prev) =>
-      prev.map((a) => (a.id === amostraAtualizada.id ? amostraAtualizada : a))
-    );
-    setModalOpen(false);
+  function abrirNovoModal() {
     setAmostraEditando(null);
+    setModalOpen(true);
   }
 
-  // 🔵 Logout
-  function sair() {
-    setUsuario(null);
-    setModoVisitante(true);
+  function abrirEdicao(amostra) {
+    setAmostraEditando(amostra);
+    setModalOpen(true);
   }
 
-  // 🟡 TELA VISITANTE
-  if (modoVisitante) {
-    return (
-      <Visitante
-        amostras={amostras}
-        entrar={() => setModoVisitante(false)}
-      />
-    );
-  }
-
-  // 🟢 TELA LOGIN
-  if (!usuario) {
-    return <Login onLogin={setUsuario} />;
-  }
-
-  // 🔴 TELA PRINCIPAL (LOGADO)
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
+
       {/* HEADER */}
       <div className="flex justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Controle de Amostras</h1>
-          <p className="text-gray-400">Usuário: <strong>{usuario}</strong></p>
-        </div>
+        <h1 className="text-3xl font-bold">Controle de Amostras</h1>
 
-        <div className="flex gap-3">
-          <button
-            onClick={() => {
-              setAmostraEditando(null);
-              setModalOpen(true);
-            }}
-            className="bg-blue-600 px-4 py-2 rounded"
-          >
-            Nova Amostra
-          </button>
-
-          <button
-            onClick={sair}
-            className="bg-red-600 px-4 py-2 rounded"
-          >
-            Sair
-          </button>
-        </div>
+        {usuario ? (
+          <div className="flex items-center gap-4">
+            <p>Usuário: <strong>{usuario}</strong></p>
+            <button
+              onClick={() => setUsuario(null)}
+              className="bg-red-600 px-3 py-1 rounded"
+            >
+              Sair
+            </button>
+          </div>
+        ) : (
+          <Login setUsuario={setUsuario} />
+        )}
       </div>
 
-      {/* GRÁFICOS */}
+      {/* DASHBOARD */}
       <DashboardCharts amostras={amostras} />
 
-      {/* LISTA */}
-      <div className="grid gap-4 mt-6">
-        {amostras.map((amostra) => (
-          <div
-            key={amostra.id}
-            className="bg-gray-800 p-4 rounded flex justify-between items-center"
-          >
-            <div>
-              <p className="font-semibold">
-                Nº Série: {amostra.numeroSerie}
-              </p>
-              <p className="text-sm text-gray-400">
-                Modelo: {amostra.modelo}
-              </p>
-              <p className="text-sm text-gray-400">
-                Status: {amostra.status} | Obs: {amostra.observacao}
-              </p>
-              <p className="text-sm text-gray-500">
-                Criado por: {amostra.criadoPor}
-              </p>
-            </div>
+      {/* BOTÃO NOVA AMOSTRA (só logado) */}
+      {usuario && (
+        <button
+          onClick={abrirNovoModal}
+          className="bg-blue-600 px-4 py-2 rounded mt-6 mb-6"
+        >
+          Nova Amostra
+        </button>
+      )}
 
-            {/* Só Igor pode editar tudo */}
-            {(usuario === "Igor" || usuario === amostra.criadoPor) && (
-              <button
-                onClick={() => {
-                  setAmostraEditando(amostra);
-                  setModalOpen(true);
-                }}
-                className="bg-yellow-600 px-3 py-1 rounded"
-              >
-                Editar
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
+      {/* LISTA / VISITANTE */}
+      <Visitante
+        amostras={amostras}
+        onEditar={usuario ? abrirEdicao : null}
+      />
 
       {/* MODAL */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSave={amostraEditando ? editarAmostra : adicionarAmostra}
+        onSave={handleSave}
         amostraEditando={amostraEditando}
         usuario={usuario}
       />
+
     </div>
   );
 }
 
 export default App;
+
 
 
 
