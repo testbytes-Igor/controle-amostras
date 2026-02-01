@@ -1,4 +1,4 @@
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzuFlJqbdWjE5yvZYtJuDYIPcGRotNukNBsBT4mZR49_-nQgB7gRaWii6rmW1mfBOpl/exec";
+const URL_SCRIPT = "https://script.google.com/macros/library/d/1SM1VqVJCwx4hU6loVHBb_IceDgEdp1U749nXGCTPJwe_bA5OWigfBtHz/12";
 const TOKEN = "LAB_AMOSTRAS_2026";
 
 export async function enviarParaPlanilha(amostra) {
