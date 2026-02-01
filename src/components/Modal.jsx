@@ -18,7 +18,7 @@ export default function Modal({ isOpen, onClose, onSave, amostra }) {
       setObservacao(amostra.observacao || OBS[0]);
       setDestinacao(amostra.destinacao || "");
     } else {
-      // LIMPA quando é nova amostra
+      // 🔥 limpa tudo quando é nova amostra
       setNumeroSerie("");
       setModelo("");
       setStatus(STATUS[0]);
@@ -33,7 +33,9 @@ export default function Modal({ isOpen, onClose, onSave, amostra }) {
     e.preventDefault();
 
     onSave({
-      id: amostra?.id,
+      // 🔥 Só envia id se estiver editando
+      ...(amostra && { id: amostra.id }),
+
       numeroSerie,
       modelo,
       status,
@@ -54,6 +56,7 @@ export default function Modal({ isOpen, onClose, onSave, amostra }) {
             onChange={e => setNumeroSerie(e.target.value)}
             placeholder="Número de Série"
             className="w-full border p-2 rounded"
+            required
           />
 
           <input
@@ -61,6 +64,7 @@ export default function Modal({ isOpen, onClose, onSave, amostra }) {
             onChange={e => setModelo(e.target.value)}
             placeholder="Modelo"
             className="w-full border p-2 rounded"
+            required
           />
 
           <select
@@ -98,6 +102,7 @@ export default function Modal({ isOpen, onClose, onSave, amostra }) {
     </div>
   );
 }
+
 
 
 
