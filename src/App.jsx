@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Modal from "./components/Modal";
 import DashboardCharts from "./components/DashboardCharts";
+import Visitante from "./components/Visitante";
+import Login from "./components/Login";
 import { enviarParaPlanilha, buscarDaPlanilha } from "./services/planilha";
 import { criarModeloAmostra } from "./models/AmostraModel";
 
@@ -9,9 +11,12 @@ export default function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState(null);
 
-  const usuario = "Igor";
+  const [usuario, setUsuario] = useState(null);
+  const [mostrarLogin, setMostrarLogin] = useState(false);
 
   useEffect(() => {
+    const user = localStorage.getItem("usuarioLogado");
+    if (user) setUsuario(user);
     carregar();
   }, []);
 
@@ -26,22 +31,67 @@ export default function App() {
     await carregar();
   }
 
+  // VISITANTE
+  if (!usuario && !mostrarLogin) {
+    return (
+      <Visitante
+        amostras={amostras}
+        onEntrar={() => setMostrarLogin(true)}
+      />
+    );
+  }
+
+  // LOGIN
+  if (!usuario && mostrarLogin) {
+    return (
+      <Login
+        onLogin={(user) => {
+          localStorage.setItem("usuarioLogado", user);
+          setUsuario(user);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="p-8 bg-gray-900 min-h-screen text-white">
+      <div className="flex justify-between mb-4">
+        <p>Usuário: <strong>{usuario}</strong></p>
+        <button
+          onClick={() => {
+            localStorage.removeItem("usuarioLogado");
+            setUsuario(null);
+          }}
+          className="bg-red-600 px-3 py-1 rounded"
+        >
+          Sair
+        </button>
+      </div>
+
       <h1 className="text-3xl mb-4">Controle de Amostras</h1>
 
       <DashboardCharts amostras={amostras} />
 
-      <button onClick={() => { setEditando(null); setModalOpen(true); }}
-        className="bg-blue-600 px-4 py-2 rounded my-4">
+      <button
+        onClick={() => {
+          setEditando(null);
+          setModalOpen(true);
+        }}
+        className="bg-blue-600 px-4 py-2 rounded my-4"
+      >
         Nova Amostra
       </button>
 
       {amostras.map(a => (
         <div key={a.id} className="bg-gray-800 p-4 my-2 rounded">
           {a.numeroSerie} - {a.modelo}
-          <button onClick={() => { setEditando(a); setModalOpen(true); }}
-            className="ml-4 bg-yellow-600 px-2 py-1 rounded">
+          <button
+            onClick={() => {
+              setEditando(a);
+              setModalOpen(true);
+            }}
+            className="ml-4 bg-yellow-600 px-2 py-1 rounded"
+          >
             Editar
           </button>
         </div>
@@ -56,6 +106,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
