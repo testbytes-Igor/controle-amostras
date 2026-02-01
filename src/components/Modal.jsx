@@ -9,19 +9,23 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
 
   useEffect(() => {
     if (amostra) {
-      setNumeroSerie(amostra.numeroSerie);
-      setModelo(amostra.modelo);
-      setStatus(amostra.status);
-      setObservacao(amostra.observacao);
+      setNumeroSerie(amostra.numeroSerie || "");
+      setModelo(amostra.modelo || "");
+      setStatus(amostra.status || "");
+      setObservacao(amostra.observacao || "Pendente");
       setDestinacao(amostra.destinacao || "");
     } else {
-      setNumeroSerie("");
-      setModelo("");
-      setStatus("");
-      setObservacao("Pendente");
-      setDestinacao("");
+      limparCampos();
     }
   }, [amostra]);
+
+  function limparCampos() {
+    setNumeroSerie("");
+    setModelo("");
+    setStatus("");
+    setObservacao("Pendente");
+    setDestinacao("");
+  }
 
   if (!isOpen) return null;
 
@@ -38,15 +42,18 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
       return;
     }
 
-    onSave({
-      id: amostra?.id,
+    // 🔥 AQUI ESTÁ A CORREÇÃO CRÍTICA
+    const dadosCompletos = {
+      ...amostra, // preserva criadoPor, editadoPor, data
+      id: amostra?.id || Date.now().toString(),
       numeroSerie,
       modelo,
       status,
       observacao,
       destinacao,
-    });
+    };
 
+    onSave(dadosCompletos);
     onClose();
   }
 
@@ -101,10 +108,17 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
           />
 
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="bg-gray-400 px-4 py-2 rounded text-white">
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-400 px-4 py-2 rounded text-white"
+            >
               Cancelar
             </button>
-            <button type="submit" className="bg-blue-600 px-4 py-2 rounded text-white">
+            <button
+              type="submit"
+              className="bg-blue-600 px-4 py-2 rounded text-white"
+            >
               Salvar
             </button>
           </div>
@@ -115,6 +129,7 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
 }
 
 export default Modal;
+
 
 
 
