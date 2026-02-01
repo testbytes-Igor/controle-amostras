@@ -3,132 +3,93 @@ import { useState, useEffect } from "react";
 function Modal({ isOpen, onClose, onSave, amostra }) {
   const [numeroSerie, setNumeroSerie] = useState("");
   const [modelo, setModelo] = useState("");
-  const [status, setStatus] = useState("");
-  const [observacao, setObservacao] = useState("Pendente");
+  const [status, setStatus] = useState("em_teste");
+  const [observacao, setObservacao] = useState("pendente");
   const [destinacao, setDestinacao] = useState("");
 
   useEffect(() => {
     if (amostra) {
-      setNumeroSerie(amostra.numeroSerie || "");
-      setModelo(amostra.modelo || "");
-      setStatus(amostra.status || "");
-      setObservacao(amostra.observacao || "Pendente");
+      setNumeroSerie(amostra.numeroSerie);
+      setModelo(amostra.modelo);
+      setStatus(amostra.status);
+      setObservacao(amostra.observacao);
       setDestinacao(amostra.destinacao || "");
-    } else {
-      limparCampos();
     }
   }, [amostra]);
-
-  function limparCampos() {
-    setNumeroSerie("");
-    setModelo("");
-    setStatus("");
-    setObservacao("Pendente");
-    setDestinacao("");
-  }
 
   if (!isOpen) return null;
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (!numeroSerie || !modelo || !status) {
-      alert("Preencha os campos obrigatórios!");
-      return;
-    }
-
-    if (status === "Finalizado" && !destinacao) {
-      alert("Informe a destinação!");
-      return;
-    }
-
-    // 🔥 AQUI ESTÁ A CORREÇÃO CRÍTICA
-    const dadosCompletos = {
-      ...amostra, // preserva criadoPor, editadoPor, data
-      id: amostra?.id || Date.now().toString(),
+    onSave({
+      id: amostra?.id,
       numeroSerie,
       modelo,
       status,
       observacao,
       destinacao,
-    };
+    });
 
-    onSave(dadosCompletos);
     onClose();
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-      <div className="bg-white rounded-lg w-[520px] p-6 shadow-lg text-gray-800">
-        <h2 className="text-xl font-bold mb-4">
-          {amostra ? "Editar Amostra" : "Nova Amostra"}
-        </h2>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+      <div className="bg-white p-6 rounded w-[500px] text-black">
+        <h2 className="text-xl mb-4">Amostra</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            placeholder="Número de Série"
-            value={numeroSerie}
-            onChange={(e) => setNumeroSerie(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
+        <input
+          className="border p-2 w-full mb-2"
+          placeholder="Número de Série"
+          value={numeroSerie}
+          onChange={(e) => setNumeroSerie(e.target.value)}
+        />
 
-          <input
-            placeholder="Modelo"
-            value={modelo}
-            onChange={(e) => setModelo(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
+        <input
+          className="border p-2 w-full mb-2"
+          placeholder="Modelo"
+          value={modelo}
+          onChange={(e) => setModelo(e.target.value)}
+        />
 
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full border p-2 rounded"
-          >
-            <option value="">Selecione</option>
-            <option>Em teste</option>
-            <option>Aguardando</option>
-            <option>Finalizado</option>
-          </select>
+        <select
+          className="border p-2 w-full mb-2"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="em_teste">Em teste</option>
+          <option value="aguardando">Aguardando</option>
+          <option value="finalizado">Finalizado</option>
+        </select>
 
-          <select
-            value={observacao}
-            onChange={(e) => setObservacao(e.target.value)}
-            className="w-full border p-2 rounded"
-          >
-            <option>Pendente</option>
-            <option>OK</option>
-            <option>NOK</option>
-          </select>
+        <select
+          className="border p-2 w-full mb-2"
+          value={observacao}
+          onChange={(e) => setObservacao(e.target.value)}
+        >
+          <option value="pendente">Pendente</option>
+          <option value="OK">OK</option>
+          <option value="NOK">NOK</option>
+        </select>
 
-          <input
-            placeholder="Destinação"
-            value={destinacao}
-            onChange={(e) => setDestinacao(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
+        <input
+          className="border p-2 w-full mb-4"
+          placeholder="Destinação"
+          value={destinacao}
+          onChange={(e) => setDestinacao(e.target.value)}
+        />
 
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="bg-gray-400 px-4 py-2 rounded text-white"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="bg-blue-600 px-4 py-2 rounded text-white"
-            >
-              Salvar
-            </button>
-          </div>
-        </form>
+        <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded">
+          Salvar
+        </button>
       </div>
     </div>
   );
 }
 
 export default Modal;
+
 
 
 

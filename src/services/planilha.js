@@ -1,4 +1,4 @@
-const URL = "https://script.google.com/macros/s/AKfycbyXRRJspUdp-jp8zozioSZpYf8tJ-3K2kb_cesZDGfdTQiOX5I04Ol-gG8VNI0EIKmK/exec";
+const URL = "https://script.google.com/macros/s/AKfycbxrpaFcnSNABbl7Bi_VI7WP7hOoi7N_Pb7A8iGGRXEVzyc-H-UxVg6pznsUS1DxHosj/exec";
 const TOKEN = "LAB_AMOSTRAS_2026";
 
 // 🔥 ENVIA (novo ou edição)
