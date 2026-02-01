@@ -1,146 +1,149 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Modal from "./components/Modal";
 import Login from "./components/Login";
+import Visitante from "./components/Visitante";
 import DashboardCharts from "./components/DashboardCharts";
-import { enviarParaPlanilha } from "./services/planilha";
+import { enviarParaPlanilha, buscarDaPlanilha } from "./services/planilha";
 
 function App() {
   const [amostras, setAmostras] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [usuario, setUsuario] = useState(null);
+  const [modoVisitante, setModoVisitante] = useState(true);
   const [amostraEditando, setAmostraEditando] = useState(null);
 
-  // Carregar usuário logado
+  // 🔵 Carrega dados da planilha ao iniciar
   useEffect(() => {
-    const user = localStorage.getItem("usuarioLogado");
-    if (user) setUsuario(user);
-  }, []);
-
-  // Carregar amostras
-  useEffect(() => {
-    const dados = localStorage.getItem("amostras");
-    if (dados) setAmostras(JSON.parse(dados));
-  }, []);
-
-  // Salvar sempre que mudar
-  useEffect(() => {
-    localStorage.setItem("amostras", JSON.stringify(amostras));
-  }, [amostras]);
-
-  function salvarAmostra(amostra) {
-    if (amostraEditando) {
-      const atualizadas = amostras.map((a) =>
-        a.id === amostra.id
-          ? { ...amostra, editadoPor: usuario }
-          : a
-      );
-      setAmostras(atualizadas);
-      enviarParaPlanilha({ ...amostra, editadoPor: usuario });
-    } else {
-      const nova = {
-        ...amostra,
-        id: Date.now(),
-        criadoPor: usuario,
-        editadoPor: usuario,
-      };
-      setAmostras([...amostras, nova]);
-      enviarParaPlanilha(nova);
+    async function carregar() {
+      const dados = await buscarDaPlanilha();
+      setAmostras(dados);
     }
+    carregar();
+  }, []);
 
+  // 🔵 Adicionar nova amostra
+  async function adicionarAmostra(novaAmostra) {
+    await enviarParaPlanilha(novaAmostra);
+    setAmostras((prev) => [...prev, novaAmostra]);
+    setModalOpen(false);
+  }
+
+  // 🔵 Editar amostra (apenas visual no app, histórico fica na planilha)
+  function editarAmostra(amostraAtualizada) {
+    setAmostras((prev) =>
+      prev.map((a) => (a.id === amostraAtualizada.id ? amostraAtualizada : a))
+    );
     setModalOpen(false);
     setAmostraEditando(null);
   }
 
-  function editarAmostra(amostra) {
-    setAmostraEditando(amostra);
-    setModalOpen(true);
+  // 🔵 Logout
+  function sair() {
+    setUsuario(null);
+    setModoVisitante(true);
   }
 
-  function removerAmostra(id) {
-    const lista = amostras.filter((a) => a.id !== id);
-    setAmostras(lista);
+  // 🟡 TELA VISITANTE
+  if (modoVisitante) {
+    return (
+      <Visitante
+        amostras={amostras}
+        entrar={() => setModoVisitante(false)}
+      />
+    );
   }
 
+  // 🟢 TELA LOGIN
   if (!usuario) {
     return <Login onLogin={setUsuario} />;
   }
 
+  // 🔴 TELA PRINCIPAL (LOGADO)
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="flex justify-between mb-4">
-        <p>
-          Usuário: <strong>{usuario}</strong>
-        </p>
-        <button
-          onClick={() => {
-            localStorage.removeItem("usuarioLogado");
-            setUsuario(null);
-          }}
-          className="bg-red-600 px-3 py-1 rounded"
-        >
-          Sair
-        </button>
+      {/* HEADER */}
+      <div className="flex justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">Controle de Amostras</h1>
+          <p className="text-gray-400">Usuário: <strong>{usuario}</strong></p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              setAmostraEditando(null);
+              setModalOpen(true);
+            }}
+            className="bg-blue-600 px-4 py-2 rounded"
+          >
+            Nova Amostra
+          </button>
+
+          <button
+            onClick={sair}
+            className="bg-red-600 px-4 py-2 rounded"
+          >
+            Sair
+          </button>
+        </div>
       </div>
 
-      <h1 className="text-3xl font-bold mb-6">Controle de Amostras</h1>
-
+      {/* GRÁFICOS */}
       <DashboardCharts amostras={amostras} />
 
-      <button
-        onClick={() => setModalOpen(true)}
-        className="bg-blue-600 px-4 py-2 rounded mb-6"
-      >
-        Nova Amostra
-      </button>
-
-      <div className="grid gap-4">
-        {amostras.map((a) => (
+      {/* LISTA */}
+      <div className="grid gap-4 mt-6">
+        {amostras.map((amostra) => (
           <div
-            key={a.id}
-            className="bg-gray-800 p-4 rounded flex justify-between"
+            key={amostra.id}
+            className="bg-gray-800 p-4 rounded flex justify-between items-center"
           >
             <div>
-              <p className="font-bold">{a.numeroSerie}</p>
-              <p className="text-sm text-gray-400">Modelo: {a.modelo}</p>
-              <p className="text-sm">Status: {a.status}</p>
-              <p className="text-xs text-gray-500">
-                Criado por: {a.criadoPor} | Editado por: {a.editadoPor}
+              <p className="font-semibold">
+                Nº Série: {amostra.numeroSerie}
+              </p>
+              <p className="text-sm text-gray-400">
+                Modelo: {amostra.modelo}
+              </p>
+              <p className="text-sm text-gray-400">
+                Status: {amostra.status} | Obs: {amostra.observacao}
+              </p>
+              <p className="text-sm text-gray-500">
+                Criado por: {amostra.criadoPor}
               </p>
             </div>
 
-            <div className="flex gap-2">
+            {/* Só Igor pode editar tudo */}
+            {(usuario === "Igor" || usuario === amostra.criadoPor) && (
               <button
-                onClick={() => editarAmostra(a)}
-                className="bg-yellow-600 px-3 py-1 rounded text-sm"
+                onClick={() => {
+                  setAmostraEditando(amostra);
+                  setModalOpen(true);
+                }}
+                className="bg-yellow-600 px-3 py-1 rounded"
               >
                 Editar
               </button>
-
-              <button
-                onClick={() => removerAmostra(a.id)}
-                className="bg-red-600 px-3 py-1 rounded text-sm"
-              >
-                Excluir
-              </button>
-            </div>
+            )}
           </div>
         ))}
       </div>
 
+      {/* MODAL */}
       <Modal
         isOpen={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setAmostraEditando(null);
-        }}
-        onSave={salvarAmostra}
+        onClose={() => setModalOpen(false)}
+        onSave={amostraEditando ? editarAmostra : adicionarAmostra}
         amostraEditando={amostraEditando}
+        usuario={usuario}
       />
     </div>
   );
 }
 
 export default App;
+
+
 
 
 
