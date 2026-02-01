@@ -1,55 +1,72 @@
 import { useState, useEffect } from "react";
+import { criarModeloAmostra } from "../models/AmostraModel";
 
-function Modal({ isOpen, onClose, onSave, amostra }) {
-  const [serie, setSerie] = useState("");
+function Modal({ isOpen, onClose, onSave, amostraEditando, usuario }) {
+  const [numeroSerie, setNumeroSerie] = useState("");
   const [modelo, setModelo] = useState("");
-  const [status, setStatus] = useState("");
-  const [observacao, setObservacao] = useState("Pendente");
+  const [status, setStatus] = useState("em_teste");
+  const [observacao, setObservacao] = useState("pendente");
   const [destinacao, setDestinacao] = useState("");
 
-  // Preencher campos quando estiver editando
+  // 🔵 Preenche quando estiver editando
   useEffect(() => {
-    if (amostra) {
-      setSerie(amostra.serie);
-      setModelo(amostra.modelo);
-      setStatus(amostra.status);
-      setObservacao(amostra.observacao);
-      setDestinacao(amostra.destinacao || "");
+    if (amostraEditando) {
+      setNumeroSerie(amostraEditando.numeroSerie);
+      setModelo(amostraEditando.modelo);
+      setStatus(amostraEditando.status);
+      setObservacao(amostraEditando.observacao);
+      setDestinacao(amostraEditando.destinacao || "");
     } else {
-      // Limpa quando for nova amostra
-      setSerie("");
+      setNumeroSerie("");
       setModelo("");
-      setStatus("");
-      setObservacao("Pendente");
+      setStatus("em_teste");
+      setObservacao("pendente");
       setDestinacao("");
     }
-  }, [amostra]);
+  }, [amostraEditando]);
 
   if (!isOpen) return null;
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (!serie || !modelo || !status) {
+    if (!numeroSerie || !modelo || !status) {
       alert("Preencha todos os campos obrigatórios!");
       return;
     }
 
-    if (status === "Finalizado" && !destinacao) {
+    if (status === "finalizado" && !destinacao) {
       alert("Informe a destinação quando o status for Finalizado.");
       return;
     }
 
-    const dadosAmostra = {
-      id: amostra ? amostra.id : Date.now(),
-      serie,
-      modelo,
-      status,
-      observacao,
-      destinacao,
-    };
+    let amostraFinal;
 
-    onSave(dadosAmostra);
+    // 🟡 Se estiver editando
+    if (amostraEditando) {
+      amostraFinal = {
+        ...amostraEditando,
+        numeroSerie,
+        modelo,
+        status,
+        observacao,
+        destinacao,
+        editadoPor: usuario,
+      };
+    }
+    // 🟢 Nova amostra
+    else {
+      amostraFinal = criarModeloAmostra({
+        numeroSerie,
+        modelo,
+        status,
+        observacao,
+        destinacao,
+        usuario,
+      });
+    }
+
+    onSave(amostraFinal);
     onClose();
   }
 
@@ -57,7 +74,7 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
       <div className="bg-white rounded-lg w-[520px] p-6 shadow-lg text-gray-800">
         <h2 className="text-xl font-bold mb-4">
-          {amostra ? "Editar Amostra" : "Nova Amostra"}
+          {amostraEditando ? "Editar Amostra" : "Nova Amostra"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,8 +86,8 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
             </label>
             <input
               type="text"
-              value={serie}
-              onChange={(e) => setSerie(e.target.value)}
+              value={numeroSerie}
+              onChange={(e) => setNumeroSerie(e.target.value)}
               className="w-full border rounded px-3 py-2"
               placeholder="Ex: 23BRX88921"
             />
@@ -100,10 +117,9 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
               onChange={(e) => setStatus(e.target.value)}
               className="w-full border rounded px-3 py-2"
             >
-              <option value="">Selecione</option>
-              <option value="Em teste">Em teste</option>
-              <option value="Aguardando">Aguardando</option>
-              <option value="Finalizado">Finalizado</option>
+              <option value="em_teste">Em teste</option>
+              <option value="aguardando">Aguardando</option>
+              <option value="finalizado">Finalizado</option>
             </select>
           </div>
 
@@ -117,7 +133,7 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
               onChange={(e) => setObservacao(e.target.value)}
               className="w-full border rounded px-3 py-2"
             >
-              <option value="Pendente">Pendente</option>
+              <option value="pendente">Pendente</option>
               <option value="OK">OK</option>
               <option value="NOK">NOK</option>
             </select>
@@ -126,7 +142,7 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
           {/* Destinação */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Destinação {status === "Finalizado" && "*"}
+              Destinação {status === "finalizado" && "*"}
             </label>
             <input
               type="text"
@@ -162,6 +178,7 @@ function Modal({ isOpen, onClose, onSave, amostra }) {
 }
 
 export default Modal;
+
 
 
 
