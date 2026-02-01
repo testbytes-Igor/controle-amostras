@@ -6,38 +6,47 @@ import Login from "./components/Login";
 import { enviarParaPlanilha, buscarDaPlanilha } from "./services/planilha";
 import { criarModeloAmostra } from "./models/AmostraModel";
 
-export default function App() {
+function App() {
   const [amostras, setAmostras] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState(null);
 
   const [usuario, setUsuario] = useState(null);
   const [mostrarLogin, setMostrarLogin] = useState(false);
+  const [carregado, setCarregado] = useState(false);
 
+  // Carrega usuário
   useEffect(() => {
     const user = localStorage.getItem("usuarioLogado");
     if (user) setUsuario(user);
-    carregar();
   }, []);
 
-  async function carregar() {
-    const dados = await buscarDaPlanilha();
-    setAmostras(dados);
-  }
+  // Carrega dados da planilha
+  useEffect(() => {
+    async function carregar() {
+      const dados = await buscarDaPlanilha();
+      setAmostras(dados);
+      setCarregado(true);
+    }
+    carregar();
+  }, []);
 
   async function salvar(dados) {
     const modelo = criarModeloAmostra(dados, usuario);
     await enviarParaPlanilha(modelo);
-    await carregar();
+
+    const atualizados = await buscarDaPlanilha();
+    setAmostras(atualizados);
+  }
+
+  if (!carregado) {
+    return <div className="text-white p-8">Carregando dados...</div>;
   }
 
   // VISITANTE
   if (!usuario && !mostrarLogin) {
     return (
-      <Visitante
-        amostras={amostras}
-        onEntrar={() => setMostrarLogin(true)}
-      />
+      <Visitante amostras={amostras} onEntrar={() => setMostrarLogin(true)} />
     );
   }
 
@@ -82,8 +91,8 @@ export default function App() {
         Nova Amostra
       </button>
 
-      {amostras.map(a => (
-        <div key={a.id} className="bg-gray-800 p-4 my-2 rounded">
+      {amostras.map((a) => (
+        <div key={a.id} className="bg-gray-800 p-4 rounded my-2">
           {a.numeroSerie} - {a.modelo}
           <button
             onClick={() => {
@@ -106,6 +115,8 @@ export default function App() {
     </div>
   );
 }
+
+export default App;
 
 
 
